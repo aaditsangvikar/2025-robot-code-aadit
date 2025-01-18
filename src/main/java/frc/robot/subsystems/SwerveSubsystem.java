@@ -1,6 +1,12 @@
 /* Black Knights Robotics (C) 2025 */
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.studica.frc.AHRS;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
@@ -10,15 +16,21 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayEntry;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.util.WPIUtilJNI;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.DrivetrainConstants;
 import frc.robot.controllers.MAXSwerveModule;
@@ -412,6 +424,20 @@ public class SwerveSubsystem extends SubsystemBase {
                 rearRight.getState());
     }
 
+    /**
+     * Drive the robot with {@link ChassisSpeeds} (mainly used for path planner)
+     * @param chassisSpeeds {@link ChassisSpeeds} object
+     */
+    public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
+        double forward = chassisSpeeds.vxMetersPerSecond;
+        double sideways = chassisSpeeds.vyMetersPerSecond;
+        double rotation = chassisSpeeds.omegaRadiansPerSecond;
+
+        drive(forward, sideways, rotation, false, false);//ratelimit was true, to be tested
+
+    }
+
+
     /** Reset the gyro */
     public void zeroGyro() {
         gyro.reset();
@@ -421,5 +447,40 @@ public class SwerveSubsystem extends SubsystemBase {
     public void zeroGyroAndOdometry() {
         gyro.reset();
         resetOdometry(new Pose2d(0.0, 0.0, new Rotation2d(0.0)));
+    }
+
+
+
+    public Command followPathCommand(String pathName) {
+        try{
+            PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+            new FollowPathCommand(
+
+            )
+            return new FollowPathCommand(
+                    path,
+                    this::getPose, // Robot pose supplier
+                    this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                    this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds, AND feedforwards
+                    new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                            new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                            new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                    ),
+                    DrivetrainConstants.robotConfig, // The robot configuration
+                    () -> {
+                        // Boolean supplier that controls when the path will be mirrored for the red alliance
+                        // This will flip the path being followed to the red side of the field.
+                        // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+                        var alliance = DriverStation.getAlliance();
+                        return alliance.filter(value -> value == DriverStation.Alliance.Red).isPresent();
+                    },
+                    this // Reference to this subsystem to set requirements
+            );
+        } catch (Exception e) {
+            DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+            return Commands.none();
+        }
     }
 }

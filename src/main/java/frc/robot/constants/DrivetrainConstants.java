@@ -1,8 +1,11 @@
 /* Black Knights Robotics (C) 2025 */
 package frc.robot.constants;
 
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 public class DrivetrainConstants {
@@ -70,4 +73,23 @@ public class DrivetrainConstants {
                     / (DRIVING_MOTOR_PINION_TEETH * BEVEL_PINION_TEETH);
     public static final double DRIVE_WHEEL_FREE_SPEED_RPS =
             (DRIVING_MOTOR_FREE_SPEED_RPS * WHEEL_CIRCUMFERENCE_METERS) / DRIVING_MOTOR_REDUCTION;
+
+
+    public static RobotConfig robotConfig = new RobotConfig(
+            50, // mass in kg
+            0.5, // moment of inertia
+            new ModuleConfig(
+                    0.07, // wheel radius
+                    4.0, // max drive speed
+                    0.5, // wheel cof
+                    new DCMotor(1,1,1,1,1,1),
+                    38,
+                    1
+            ),
+            new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2),
+            new Translation2d(WHEEL_BASE / 2, -TRACK_WIDTH / 2),
+            new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2),
+            new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2)
+    );
+
 }
