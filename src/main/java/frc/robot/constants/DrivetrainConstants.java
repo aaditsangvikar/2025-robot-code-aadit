@@ -74,22 +74,19 @@ public class DrivetrainConstants {
     public static final double DRIVE_WHEEL_FREE_SPEED_RPS =
             (DRIVING_MOTOR_FREE_SPEED_RPS * WHEEL_CIRCUMFERENCE_METERS) / DRIVING_MOTOR_REDUCTION;
 
-
-    public static RobotConfig robotConfig = new RobotConfig(
-            50, // mass in kg
-            0.5, // moment of inertia
-            new ModuleConfig(
-                    0.07, // wheel radius
-                    4.0, // max drive speed
-                    0.5, // wheel cof
-                    new DCMotor(1,1,1,1,1,1),
-                    38,
-                    1
-            ),
-            new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2),
-            new Translation2d(WHEEL_BASE / 2, -TRACK_WIDTH / 2),
-            new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2),
-            new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2)
-    );
-
+    public static RobotConfig robotConfig =
+            new RobotConfig(
+                    50, // mass in kg
+                    0.5, // moment of inertia
+                    new ModuleConfig(
+                            0.07, // wheel radius
+                            4.0, // max drive speed
+                            0.5, // wheel cof
+                            new DCMotor(1, 1, 1, 1, 1, 1),
+                            38,
+                            1),
+                    new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2),
+                    new Translation2d(WHEEL_BASE / 2, -TRACK_WIDTH / 2),
+                    new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2),
+                    new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2));
 }
