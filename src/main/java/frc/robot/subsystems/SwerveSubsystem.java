@@ -7,6 +7,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.DriveFeedforwards;
 import com.studica.frc.AHRS;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
@@ -36,6 +37,8 @@ import frc.robot.constants.DrivetrainConstants;
 import frc.robot.controllers.MAXSwerveModule;
 import frc.robot.utils.NetworkTablesUtils;
 import frc.robot.utils.SwerveUtils;
+
+import java.util.Optional;
 
 public class SwerveSubsystem extends SubsystemBase {
     // Create MAXSwerveModules
@@ -425,7 +428,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /**
-     * Drive the robot with {@link ChassisSpeeds} (mainly used for path planner)
+     * Drive the robot with {@link ChassisSpeeds} (Used for PathPlanner {@link com.pathplanner.lib.auto.AutoBuilder})
      * @param chassisSpeeds {@link ChassisSpeeds} object
      */
     public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
@@ -434,6 +437,20 @@ public class SwerveSubsystem extends SubsystemBase {
         double rotation = chassisSpeeds.omegaRadiansPerSecond;
 
         drive(forward, sideways, rotation, false, false);//ratelimit was true, to be tested
+
+    }
+
+    /**
+     * Drive the robot with {@link ChassisSpeeds} and {@link DriveFeedforwards} (Used for PathPlanner Follow Single Path)
+     * @param chassisSpeeds {@link ChassisSpeeds} object
+     * @param ff {@link DriveFeedforwards} object (doesn't actually do anything with these)
+     */
+    public void driveRobotRelative(ChassisSpeeds chassisSpeeds, DriveFeedforwards ff) {
+        double forward = chassisSpeeds.vxMetersPerSecond;
+        double sideways = chassisSpeeds.vyMetersPerSecond;
+        double rotation = chassisSpeeds.omegaRadiansPerSecond;
+
+        drive(forward, sideways, rotation, false, false);
 
     }
 
@@ -449,15 +466,16 @@ public class SwerveSubsystem extends SubsystemBase {
         resetOdometry(new Pose2d(0.0, 0.0, new Rotation2d(0.0)));
     }
 
-
-
+    /**
+     * Follows a single path
+     *
+     * @param pathName The name of the path file to follow as defined in PathPlanner
+     * @return The command to follow the path
+     */
     public Command followPathCommand(String pathName) {
         try{
             PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
 
-            new FollowPathCommand(
-
-            )
             return new FollowPathCommand(
                     path,
                     this::getPose, // Robot pose supplier
