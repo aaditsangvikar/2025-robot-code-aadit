@@ -1,6 +1,6 @@
+/* Black Knights Robotics (C) 2025 */
 package org.blackknights.subsystems;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.led.*;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
@@ -8,8 +8,8 @@ import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.led.TwinkleAnimation.TwinklePercent;
 import com.ctre.phoenix.led.TwinkleOffAnimation.TwinkleOffPercent;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.blackknights.constants.LEDConstants;
-
 
 public class LEDSubsystem extends SubsystemBase {
     private final CANdle candle = new CANdle(LEDConstants.CANDLE_ID, "rio");
@@ -47,14 +47,16 @@ public class LEDSubsystem extends SubsystemBase {
         candle.configAllSettings(configAll, 100);
     }
 
-    /** Set the color of the LEDs.
-     * <p>Only call <b><u>once</u></b>.</p>
+    /**
+     * Set the color of the LEDs.
+     *
+     * <p>Only call <b><u>once</u></b>.
      *
      * @param r The red value (0-255)
      * @param g The green value (0-255)
      * @param b The blue value (0-255)
      * @param bright The brightness (0-1)
-     **/
+     */
     public void setColors(int r, int g, int b, double bright) {
         setAnimation(AnimationTypes.None);
         red = r;
@@ -63,17 +65,19 @@ public class LEDSubsystem extends SubsystemBase {
         brightness = bright;
     }
 
-    /** Set the animation of the LEDs.
-     * <p>Only call <b><u>once</u></b>.</p>
+    /**
+     * Set the animation of the LEDs.
+     *
+     * <p>Only call <b><u>once</u></b>.
      *
      * @param toChange The animation to set
-     **/
+     */
     public void setAnimation(AnimationTypes toChange) {
         int ledCount = LEDConstants.LED_COUNT;
-        switch(toChange)
-        {
+        switch (toChange) {
             case ColorFlow:
-                toAnimate = new ColorFlowAnimation(128, 20, 70, 0, 0.7, ledCount, Direction.Forward);
+                toAnimate =
+                        new ColorFlowAnimation(128, 20, 70, 0, 0.7, ledCount, Direction.Forward);
                 break;
             case Fire:
                 toAnimate = new FireAnimation(0.5, 0.7, ledCount, 0.7, 0.5);
@@ -100,10 +104,13 @@ public class LEDSubsystem extends SubsystemBase {
                 toAnimate = new StrobeAnimation(255, 0, 0, 0, 98.0 / 256.0, ledCount);
                 break;
             case Twinkle:
-                toAnimate = new TwinkleAnimation(30, 70, 60, 0, 0.4, ledCount, TwinklePercent.Percent6);
+                toAnimate =
+                        new TwinkleAnimation(30, 70, 60, 0, 0.4, ledCount, TwinklePercent.Percent6);
                 break;
             case TwinkleOff:
-                toAnimate = new TwinkleOffAnimation(70, 90, 175, 0, 0.8, ledCount, TwinkleOffPercent.Percent100);
+                toAnimate =
+                        new TwinkleOffAnimation(
+                                70, 90, 175, 0, 0.8, ledCount, TwinkleOffPercent.Percent100);
                 break;
             case None:
                 toAnimate = null;
@@ -114,7 +121,7 @@ public class LEDSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if(toAnimate == null) {
+        if (toAnimate == null) {
             candle.setLEDs(red, green, blue);
         } else {
             candle.animate(toAnimate);

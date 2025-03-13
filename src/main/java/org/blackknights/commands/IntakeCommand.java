@@ -3,11 +3,13 @@ package org.blackknights.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import org.blackknights.subsystems.IntakeSubsystem;
+import org.blackknights.subsystems.LEDSubsystem;
 import org.blackknights.utils.ConfigManager;
 
 /** Command to intake and outtake */
 public class IntakeCommand extends Command {
     private final IntakeSubsystem intakeSubsystem;
+    private final LEDSubsystem ledSubsystem;
     private final IntakeMode mode;
 
     /**
@@ -16,8 +18,10 @@ public class IntakeCommand extends Command {
      * @param intakeSubsystem The instance of {@link IntakeSubsystem}
      * @param mode The intake mode ({@link IntakeMode})
      */
-    public IntakeCommand(IntakeSubsystem intakeSubsystem, IntakeMode mode) {
+    public IntakeCommand(
+            IntakeSubsystem intakeSubsystem, LEDSubsystem ledSubsystem, IntakeMode mode) {
         this.intakeSubsystem = intakeSubsystem;
+        this.ledSubsystem = ledSubsystem;
         this.mode = mode;
         addRequirements(intakeSubsystem);
     }
@@ -43,6 +47,9 @@ public class IntakeCommand extends Command {
     @Override
     public void end(boolean interrupted) {
         intakeSubsystem.setVoltage(0);
+        if (mode.equals(IntakeMode.INTAKE)) {
+            ledSubsystem.setAnimation(LEDSubsystem.AnimationTypes.GreenStrobe);
+        }
     }
 
     @Override

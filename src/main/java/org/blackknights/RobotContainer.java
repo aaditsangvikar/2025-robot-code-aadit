@@ -26,6 +26,7 @@ public class RobotContainer {
     ArmSubsystem armSubsystem = new ArmSubsystem();
     IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     ClimberSubsystem climberSubsystem = new ClimberSubsystem();
+    LEDSubsystem ledSubsystem = new LEDSubsystem();
     ButtonBoardSubsystem buttonBoardSubsystem = new ButtonBoardSubsystem(buttonBoard);
 
     // Controllers
@@ -104,7 +105,9 @@ public class RobotContainer {
                                         armSubsystem,
                                         () -> ScoringConstants.ScoringHeights.INTAKE),
                                 new IntakeCommand(
-                                        intakeSubsystem, IntakeCommand.IntakeMode.INTAKE)));
+                                        intakeSubsystem,
+                                        ledSubsystem,
+                                        IntakeCommand.IntakeMode.INTAKE)));
 
         elevatorSubsystem.setDefaultCommand(new BaseCommand(elevatorSubsystem, armSubsystem));
 
@@ -162,11 +165,15 @@ public class RobotContainer {
 
         secondaryController
                 .rightTrigger(0.2)
-                .whileTrue(new IntakeCommand(intakeSubsystem, IntakeCommand.IntakeMode.OUTTAKE));
+                .whileTrue(
+                        new IntakeCommand(
+                                intakeSubsystem, ledSubsystem, IntakeCommand.IntakeMode.OUTTAKE));
 
         secondaryController
                 .leftTrigger(0.2)
-                .whileTrue(new IntakeCommand(intakeSubsystem, IntakeCommand.IntakeMode.INTAKE));
+                .whileTrue(
+                        new IntakeCommand(
+                                intakeSubsystem, ledSubsystem, IntakeCommand.IntakeMode.INTAKE));
     }
 
     /** Runs once when the code starts */
@@ -219,6 +226,8 @@ public class RobotContainer {
             Supplier<CoralQueue.CoralPosition> currentSupplier,
             Supplier<CoralQueue.CoralPosition> nextSupplier) {
         return new SequentialCommandGroup(
+                new InstantCommand(
+                        () -> ledSubsystem.setAnimation(LEDSubsystem.AnimationTypes.YellowStrobe)),
                 new ParallelRaceGroup(
                         new AlignCommand(
                                 swerveSubsystem,
@@ -237,7 +246,14 @@ public class RobotContainer {
                                         () -> currentSupplier.get().getPose(),
                                         true,
                                         "fine"),
-                                new IntakeCommand(intakeSubsystem, IntakeCommand.IntakeMode.OUTTAKE)
+                                new InstantCommand(
+                                        () ->
+                                                ledSubsystem.setAnimation(
+                                                        LEDSubsystem.AnimationTypes.RedStrobe)),
+                                new IntakeCommand(
+                                                intakeSubsystem,
+                                                ledSubsystem,
+                                                IntakeCommand.IntakeMode.OUTTAKE)
                                         .withTimeout(2)),
                         new ElevatorArmCommand(
                                 elevatorSubsystem,
@@ -273,7 +289,10 @@ public class RobotContainer {
                                                 : ScoringConstants.INTAKE_RED,
                                 true,
                                 "rough"),
-                        new IntakeCommand(intakeSubsystem, IntakeCommand.IntakeMode.INTAKE)
+                        new IntakeCommand(
+                                        intakeSubsystem,
+                                        ledSubsystem,
+                                        IntakeCommand.IntakeMode.INTAKE)
                                 .withTimeout(2)),
                 new ElevatorArmCommand(
                         elevatorSubsystem,
